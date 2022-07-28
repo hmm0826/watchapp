@@ -1,0 +1,50 @@
+
+.rate-container {
+	padding: 40rpx;
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: center;
+	-webkit-justify-content: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	-webkit-flex-direction: column;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
+	background-color: #FFFFFF;
+}
+.description-container {
+	height: 300rpx;
+	padding: 40rpx;
+	margin-top: 20rpx;
+	background-color: #FFFFFF;
+}
+.score-type {
+	margin: 20rpx 0;
+	color: #999;
+}
+.rate {
+	margin: 20rpx 0;
+}
+.rate-desc {
+	width: 100%;
+	height: 160rpx;
+}
+.btn-container {
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+}
+.btn-rate {
+	background-color: #008d29;
+	color: #FFFFFF;
+	border-radius: 0;
+}
+

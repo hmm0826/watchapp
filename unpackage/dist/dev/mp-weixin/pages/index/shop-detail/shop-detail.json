@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "店铺详情",
+  "usingComponents": {
+    "uni-tag": "/node-modules/@dcloudio/uni-ui/lib/uni-tag/uni-tag",
+    "rate-item": "/components/rate-item/rate-item",
+    "uni-load-more": "/node-modules/@dcloudio/uni-ui/lib/uni-load-more/uni-load-more"
+  }
+}

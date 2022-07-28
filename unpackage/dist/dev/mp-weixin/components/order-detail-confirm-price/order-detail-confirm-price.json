@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "cat-signature": "/components/cat-signature/cat-signature"
+  },
+  "component": true
+}

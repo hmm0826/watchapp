@@ -1,0 +1,35 @@
+
+.res-tittle {
+	text-align: center;
+	background-color: #FFFFFF;
+	height: 100rpx;
+	padding-top: 20rpx;
+	padding-bottom: 10rpx;
+}
+.shop-adress-container {
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	-webkit-box-pack: center;
+	-webkit-justify-content: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+}
+.shop-name {
+	font-size: 30rpx;
+	font-weight: bold;
+	margin-bottom: 10rpx;
+}
+.shop-adress {
+	font-size: 26rpx;
+}
+.landmark {
+	font-size: 26rpx;
+	color: #009245;
+}
+

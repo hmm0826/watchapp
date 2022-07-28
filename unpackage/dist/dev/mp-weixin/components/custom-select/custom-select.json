@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "custom-picker": "/components/custom-picker/custom-picker",
+    "custom-date": "/components/custom-date/custom-date"
+  },
+  "component": true
+}

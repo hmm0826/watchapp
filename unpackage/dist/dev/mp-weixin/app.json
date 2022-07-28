@@ -1,0 +1,30 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/order/order",
+    "pages/my/my",
+    "pages/home/home",
+    "pages/my/login/login",
+    "components/shop-item/shop-item",
+    "pages/index/shop-detail/shop-detail",
+    "pages/index/shop-location-map/shop-location-map",
+    "pages/order/order-info/order-info",
+    "pages/order/order-detail-info/order-detail-info",
+    "pages/order/order-appointment/order-appointment",
+    "pages/order/order-repair/order-repair",
+    "pages/order/order-complete/order-complete",
+    "pages/order/order-rating/order-rating",
+    "pages/my/master-manage/master-manage",
+    "pages/my/add-master/add-master",
+    "pages/my/finance/finance"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "usingComponents": {},
+  "sitemapLocation": "sitemap11.json"
+}
