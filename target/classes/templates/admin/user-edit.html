@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <header th:replace="header::html"></header>
+    <title>修改用户</title>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="text" id="userid" name="userid" autocomplete="off" class="layui-input" style="display: none;">
+            <input type="text" id="userroles"  autocomplete="off" class="layui-input" style="display: none;">
+            <div class="layui-form-item">
+                <label for="username" class="layui-form-label">
+                    <span class="x-red">*</span>用户名</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="username" name="username" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="userphone" class="layui-form-label">
+                    <span class="x-red">*</span>手机号码</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="userphone" name="userphone" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="phone"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="userrole" class="layui-form-label">
+                    <span class="x-red"></span>角色</label>
+                <div class="layui-input-block" id="userrole" required="required" autocomplete="off">
+                    <input class="role" type="checkbox" value="1" lay-skin="primary" name="userrole" title="管理员">
+
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <button class="layui-btn" lay-filter="confirm" lay-submit="">确定</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'layer','jquery'], function() {
+            var $ = layui.jquery;
+            var form = layui.form;
+            form.render();
+            var layer = layui.layer;
+
+
+            form.render('checkbox');
+
+            //验证规则
+            form.verify({
+                phone: function(value) {
+                    if (value.length != 11) {
+                        return '请输入正确的手机号码';
+                    }
+                },
+                emptytext: function(value) {
+                    if (value.length == 0) {
+                        return '请输入信息';
+                    }
+                }
+            });
+
+
+
+            //监听提交
+            form.on('submit(confirm)',function (data){
+                // 处理用户信息
+                var role_list = [];
+                var hasAdmin = false;
+                $("#userrole").find('input:checkbox').each(function() { //遍历所有复选框
+                    if ($(this).prop('checked') == true) {
+                        role_list.push($(this).val());
+                        if (1 == $(this).val()) {
+                            hasAdmin = true;
+                        }
+                    }
+                });
+                // 请求数据处理
+                var formData = {
+                    id: data.field.userid,
+                    username: data.field.username,
+                    phone: data.field.userphone,
+                    hasAdmin: hasAdmin,
+                    roleIds: role_list
+                }
+                $.ajax({
+                    url: '/api/user?access_token='+userInfoUtils.getAccessToken(),
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'JSON',
+                    success: function (data) {
+                        if(data.code == 200) {
+                            layer.msg("修改成功",{icon: 1,time:1000},function() {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                parent.layui.table.reload('user-list')
+                            });
+                        }
+                        else {
+                            layer.msg("修改失败",{icon: 2,time:1000});
+                        }
+                        form.render();
+                    }
+                });
+                return false;
+            });
+
+        });
+</script>
+</body>
+</html>

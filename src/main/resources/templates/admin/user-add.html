@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <header th:replace="header::html"></header>
+    <title>添加用户</title>
+</head>
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <!--用户名-->
+            <div class="layui-form-item">
+                <label for="username" class="layui-form-label">
+                    <span class="x-red">*</span>用户名</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="username" name="username" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+            <!--性别-->
+            <div class="layui-form-item">
+                <label for="sex" class="layui-form-label">
+                    <span class="x-red">*</span>性别</label>
+                <div class="layui-input-inline">
+                    <select id="sex" name="usersex" required="required" autocomplete="off" class="layui-input" lay-verify="emptytext">
+                        <option value="">请选择性别</option>
+                        <option value="1">男</option>
+                        <option value="0">女</option>
+                    </select>
+                </div>
+            </div>
+            <!--手机号码-->
+            <div class="layui-form-item">
+                <label for="userphone" class="layui-form-label">
+                    <span class="x-red">*</span>手机号码</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="userphone" name="userphone" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="phone"></div>
+            </div>
+            <!--密码-->
+            <div class="layui-form-item">
+                <label for="pass" class="layui-form-label">
+                    <span class="x-red">*</span>密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" id="pass" name="pass" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+            <!--确认密码-->
+            <div class="layui-form-item">
+                <label for="repass" class="layui-form-label">
+                    <span class="x-red">*</span>确认密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" id="repass" name="repass" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="repass"></div>
+            </div>
+            <!--确定按钮-->
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="confirm" lay-submit="">确定</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'layer','jquery'], function() {
+        var $ = layui.jquery;
+        var form = layui.form;
+        form.render();
+        var layer = layui.layer;
+
+        //验证规则
+        form.verify({
+            phone: function(value) {
+                if (value.length != 11) {
+                    return '请输入正确的手机号码';
+                }
+            },
+            repass: function(value) {
+                if ($('#pass').val() != $('#repass').val()) {
+                    return '两次密码不一致';
+                }
+            },
+            emptytext: function(value) {
+                if (value.length == 0) {
+                    return '请输入信息';
+                }
+            }
+        });
+
+
+
+
+
+        //监听提交
+        form.on('submit(confirm)',function (data){
+            $.ajax({
+                url: '/api/user?access_token='+userInfoUtils.getAccessToken(),
+                type: 'POST',
+                data: {
+                    username: data.field.username,
+                    sex: data.field.usersex,
+                    phone: data.field.userphone,
+                    password: data.field.pass
+                },
+                dataType: 'JSON',
+                success: function (data) {
+                    if(data.code == 200) {
+                        layer.msg("添加成功",{icon: 1,time:1000},function() {
+                            // 父窗体刷新
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            parent.layui.table.reload('user-list')
+                        });
+                    }
+                    else {
+                        layer.msg("添加失败",{icon: 2,time:1000});
+                    }
+                    form.render();
+                }
+
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

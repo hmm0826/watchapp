@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>钟表维修开单小程序de后台管理系统</title>
+    <header th:replace="header::html"></header>
+    <link rel="stylesheet" th:href="@{/css/login-style.css}"/>
+</head>
+
+<body>
+<div id="particles-js">
+    <div class="login">
+        <ul class="login-list">
+            <li><input type="text" placeholder="手机号码" id="uname" style="margin-top:85px"></li>
+            <li><input type="password" placeholder="密码" id="upwd"></li>
+            <li><a class="btn" onclick=loginHandle() style="text-decoration:none;cursor:pointer;">登 录</a></li>
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    // 登录按钮事件监听
+    function loginHandle() {
+        var username = document.getElementById("uname").value;
+        var pw = document.getElementById("upwd").value;
+        loginUtils.login({
+            username: username,
+            password: pw,
+            success: function (res) {
+                location.href = '/admin/?access_token=' + userInfoUtils.getAccessToken();
+            }
+        })
+    }
+    // 退出登录提示
+    layui.use(['jquery','layer'],function (){
+        if (window.urlUtils.hasParameter("logout")) {
+            console.log('logout...')
+            layui.layer ? layui.layer.msg("已为您退出登录，请重新登录") : 0;
+        }
+    });
+</script>
+</body>
+</html>

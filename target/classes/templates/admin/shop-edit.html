@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <header th:replace="header::html"></header>
+    <title>后台管理 | 钟表维修开单小程序</title>
+</head>
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <input type="text" id="shopid" name="shopid" autocomplete="off" class="layui-input" style="display: none;">
+
+            <div class="layui-form-item">
+                <label for="shopname" class="layui-form-label">
+                    <span class="x-red">*</span>店铺名称</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="shopname" name="shopname" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="shopinfo" class="layui-form-label">
+                    <span class="x-red">*</span>信息</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="shopinfo" name="shopinfo" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="shoplocation" class="layui-form-label">
+                    <span class="x-red">*</span>地址</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="shoplocation" name="shoplocation" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="longitude" class="layui-form-label">
+                    <span class="x-red">*</span>经度</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="longitude" name="longitude" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="latitude" class="layui-form-label">
+                    <span class="x-red">*</span>纬度</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="latitude" name="latitude" required="required" autocomplete="off"
+                           class="layui-input" lay-verify="emptytext"></div>
+            </div>
+
+            <div class="layui-form-item">
+                <label for="shopimg" class="layui-form-label">
+                    <span class="x-red">*</span>店面</label>
+                <input type="text" id="shopImage" name="shopImage" autocomplete="off" class="layui-input" style="display: none;">
+                <button type="button" class="layui-btn" id="shopimg" lay-verify="emptyimg">
+                    <i class="layui-icon">&#xe67c;</i>上传图片
+                </button>
+                <span style="color: #999999;">上传图片大小：650px * 280px</span>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <button class="layui-btn" lay-filter="confirm" lay-submit="">确定</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'layer','jquery','upload'], function() {
+        var $ = layui.jquery;
+        var form = layui.form;
+        form.render();
+        var layer = layui.layer;
+        var upload = layui.upload;
+        var imgUrl = $("#shopImage").val();
+        var fileUrl;
+
+        //验证规则
+        form.verify({
+            emptytext: function(value) {
+                if (value.length == 0) {
+                    return '请输入信息';
+                }
+            }
+        });
+
+        upload.render({
+            elem: '#shopimg' //绑定元素
+            ,url: '/api/file/upload?access_token='+userInfoUtils.getAccessToken() //上传接口
+            ,accept: 'images'
+            ,size: 500
+            ,auto: false
+            ,choose: function(obj){  //上传前选择回调方法
+                var flag = true;
+                obj.preview(function(index, file, result){
+                    console.log(file);            //file表示文件信息，result表示文件src地址
+                    var img = new Image();
+                    img.src = result;
+                    img.onload = function () { //初始化夹在完成后获取上传图片宽高，判断限制上传图片的大小。
+                        if(img.width ==650 && img.height ==280){
+                            obj.upload(index, file); //满足条件调用上传方法
+                        }else{
+                            flag = false;
+                            layer.msg("图片大小要求规格为：650 * 280");
+                            return false;
+                        }
+                    }
+                    return flag;
+                });
+            }
+            ,done: function(res){
+                //上传完毕回调
+                if (res.code == 200) {
+                    imgUrl = res.data;
+                    $("#shopImage").val(res.data)
+                    layer.msg("图片保存成功")
+                } else {
+                    layer.msg("图片保存失败")
+                }
+            }
+            ,error: function(){
+                //请求异常回调
+                layer.msg("图片保存失败")
+            }
+        });
+
+        //监听提交
+        form.on('submit(confirm)',function (data){
+            $.ajax({
+                url: '/api/shop?access_token='+userInfoUtils.getAccessToken(),
+                type: 'PUT',
+                data: {
+                    id: data.field.shopid,
+                    name: data.field.shopname,
+                    info: data.field.shopinfo,
+                    locationText: data.field.shoplocation,
+                    latitude:data.field.latitude,
+                    longitude:data.field.longitude,
+                    shopImage: imgUrl || data.field.shopImage
+                },
+                dataType: 'JSON',
+                success: function (data) {
+                    if(data.code == 200) {
+                        layer.msg("修改成功",{icon: 1,time:1000},function() {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            parent.layui.table.reload('shop-list')
+                        });
+                    }
+                    else {
+                        layer.msg("修改失败",{icon: 2,time:1000});
+                    }
+                    form.render();
+                }
+
+            });
+            return false;
+        });
+
+    });
+</script>
+</body>
+</html>

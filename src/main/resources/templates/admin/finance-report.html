@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<header th:replace="header::html"></header>
+<body>
+    <div class="x-nav">
+            <span class="layui-breadcrumb">
+                <a href="">首页</a>
+                <a href="">财务管理</a>
+                <a><cite>财务列表</cite></a>
+            </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+    </div>
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        <div class="layui-inline">
+                            <label class="layui-form-label" style="line-height: 30px;">财务月份：</label>
+                            <div class="layui-input-inline" style="width: 100px;">
+                                <input type="text" class="layui-input" id="financeStartDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-card-body layui-table-body layui-table-main">
+                        <table class="layui-hide" id="financeContainer" lay-filter="financeContainerFilter"></table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var currentDate = new Date();
+        var shopId = 0;
+        var shopName = '';
+        var startDate = currentDate.getFullYear() + "-" + (currentDate.getMonth()+1)
+        layui.use(['form','table','jquery','layer','laydate'], function(){
+            var form = layui.form;
+            var table = layui.table;
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            var laydate = layui.laydate;
+            // 渲染日期组件
+            laydate.render({
+                elem: '#financeStartDate',
+                format:'yyyy-MM',
+                type: 'month',
+                value: startDate,
+                max: currentDate.toString(),
+                btns: ['now', 'confirm'],
+                done: function(value, date, endDate){
+                    startDate = value;
+                    table.reload('financeContainer',{
+                        where:{
+                            //需要额外传参数(⊙o⊙)
+                            startYearMonth:startDate
+                        }
+                    });
+                }
+            });
+            // 渲染报表数据
+            table.render({
+                elem: '#financeContainer'
+                // ,url:'/api/finance/reports?access_token='+userInfoUtils.getAccessToken()
+                ,url:'/api/finance/reports'
+                ,height:500
+                ,title: '店铺财务总览'
+                ,loading:true
+                ,headers:{
+                    Authorization:'Bearer '+userInfoUtils.getAccessToken()
+                }
+                ,text:{
+                    none: '目前还未有店铺信息'
+                }
+                ,method: 'GET'
+                ,page: true
+                ,limit:10
+                ,limits:[10]
+                ,response: {
+                    statusCode: 200
+                },
+                request:{
+                    limitName:'size'
+                }
+                ,where:{
+                    //需要额外传参数(⊙o⊙)
+                    startYearMonth:startDate
+                    // ,"access_token":userInfoUtils.getAccessToken()
+                }
+                ,cols: [[
+                        {fixed: 'left', type:'checkbox', width: 80}
+                        ,{field:'shopName', title:'店铺名称', align: 'center', width: 200}
+                        ,{field: 'locationText', title: '店铺地址', align: 'center' }
+                        ,{field:'orderNum', title:'该月订单数', align: 'center', width: 196}
+                        ,{field:'income', title:'收入（单位：元）', align: 'center', width: 196}
+                    ]
+                ]
+            });
+
+        });
+    </script>
+</body>
+</html>

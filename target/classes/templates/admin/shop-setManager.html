@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<header th:replace="header::html"></header>
+
+<body>
+<div class="" style="margin-left: 18px">
+    搜索用户：
+    <div class="layui-inline">
+        <input class="layui-input" name="keyword" id="keyword" autocomplete="off" placeholder="请输入手机号">
+    </div>
+    <button class="layui-btn" data-type="reload">搜索</button>
+</div>
+<table class="layui-hide" id="tablea" lay-filter="menu-filter"></table>
+
+    <input type="text" id="shopid" name="shopid" autocomplete="off" class="layui-input" style="display: none;">
+    <input type="text" id="shopOwnerId" name="shopOwnerId" autocomplete="off" class="layui-input" style="display: none;">
+    <input type="text" id="shopOwnerName" name="shopOwnerName" autocomplete="off" class="layui-input" style="display: none;">
+    <div class="layui-card-body layui-table-body layui-table-main">
+        <table class="layui-hide" id="user-list" lay-filter="user-list"></table>
+    </div>
+<script>
+    layui.use('element', function(){
+        var element = layui.element;
+        element.init()
+    });
+</script>
+
+<script type="text/html" id="operation">
+    <a class="layui-btn layui-btn-xs" lay-event="confirm">选择</a>
+</script>
+
+<script>
+    layui.use(['form','table','jquery','layer'], function(){
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+
+        table.render({
+            elem: '#user-list'
+            ,url: '/api/user/list?access_token=' + userInfoUtils.getAccessToken()
+            ,title: '用户数据表'
+            ,method: 'GET'
+            ,page: true
+            ,response: {
+                statusCode: 200
+            }
+            ,cols: [
+                [
+                    {field:'username', title:'用户名', align: 'center', width: 150}
+                    ,{field:'roleInfo', title:'当前角色', align: 'center', width: 180,templet: function (item) {
+                        return item.roles?item.roles.map(function (role) {
+                            return role.description;
+                        }).join(',').toString():"无";
+                    }}
+                    ,{field:'right', title:'操作', toolbar: '#operation', align: 'center', width: 90}
+                ]
+            ]
+            ,id:'userList'
+        });
+        table.on('tool(user-list)',function (obj) {
+            var userId = obj.data.id;
+            var shopId = document.getElementById("shopid").value;
+            var shopOwnerId = document.getElementById("shopOwnerId").value;
+            var shopOwnerName = document.getElementById("shopOwnerName").value;
+
+            console.log('...shopId, userId...',shopId, userId);
+            // return;
+            var username = obj.data.username;
+            var confirmText = '确定设 '+username+' 为店长吗?';
+            if (shopOwnerId && userId != shopOwnerId) {
+                confirmText = '确定将店长 '+shopOwnerName+ '更新为 '+username+' 吗?';
+            }
+            layer.confirm(confirmText,function () {
+                $.ajax({
+                    url: '/api/shop/'+ shopId+'/setOwner?access_token='+userInfoUtils.getAccessToken(),
+                    type: 'POST',
+                    data: {userId: userId},
+                    dataType: 'JSON',
+                    success:function (data) {
+                        if(data.code == 200){
+                            layer.msg("店长更新成功",{icon: 1,time:1000},function() {
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                                parent.layui.table.reload('shop-list')
+                            });
+                        }else{
+                            layer.msg(data.msg,{icon: 2,time:1000});
+                        }
+                        form.render();
+                    }
+                })
+            })
+        });
+        $('.layui-btn').click(function () {
+            var inputVal = $('.layui-input').val();
+            if(!(/^1[3456789]\d{9}$/.test(inputVal))){
+                layer.msg("请输入正确手机号",{icon: 2,time:1000});
+            }else{
+                table.reload('userList',{
+                    url:'/api/user/query?access_token='+userInfoUtils.getAccessToken(),
+                    methods:'GET',
+                    where:{
+                        searchValue:inputVal
+                    }
+                })
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

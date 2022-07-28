@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="x-admin-sm"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <header th:replace="header::html"></header>
+    <title>后台管理 | 钟表维修开单小程序</title>
+</head>
+
+<body>
+<div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="">首页</a>
+            <a href="">店铺管理</a>
+            <a><cite>店铺列表</cite></a>
+        </span>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right" onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+</div>
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <button class="layui-btn"
+                            th:attr="onclick='xadmin.open(\'添加店铺\',\'/admin/getPage?path=shop-add&access_token='+${accessToken}+'\',455,450)'">
+                        <i class="layui-icon layui-icon-add-circle-fine"></i>添加</button>
+                    <button class="layui-btn layui-btn-danger" id="delSome"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-hide" id="shop-list" lay-filter="shop-list"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.use('element', function(){
+        var element = layui.element;
+        element.init()
+    });
+</script>
+<script type="text/html" id="operation">
+    <a class="layui-btn layui-btn-xs" lay-event="setManager">设置店长</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/html" id="imgTpl">
+    <img src="{{ d.shopImage }}">
+</script>
+<script>
+    layui.use(['form','table','jquery','layer'], function(){
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+
+        table.render({
+            elem: '#shop-list'
+            ,url:'/api/shop/list?access_token='+userInfoUtils.getAccessToken()
+            ,title: '店铺数据表'
+            ,method: 'GET'
+            ,page: true
+            ,request: {
+                limitName: 'size'
+            }
+            ,response: {
+                statusCode: 200
+            }
+            ,cols: [[
+                {fixed: 'left', type:'checkbox', width: 80}
+                ,{field:'name', title:'店铺名称', align: 'center'}
+                ,{field:'locationText', title:'地址', align: 'center'}
+                ,{field:'shopManagerName', title:'店长', align: 'center'}
+                ,{field:'shopImage', title:'店面', align: 'center', templet: '#imgTpl'}
+                ,{field:'right', title:'操作', toolbar: '#operation', align: 'center'}
+                ]
+            ]
+        });
+
+        table.on('tool(shop-list)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'del'){
+                layer.confirm('确定删除该数据吗？', function(index){
+                    $.ajax({
+                        url: '/api/shop/'+ data.id +'?access_token='+userInfoUtils.getAccessToken(),
+                        type: 'delete',
+                        dataType: 'JSON',
+                        success: function (data) {
+                            if(data.code == 200) {
+                                layer.msg("删除成功",{icon: 1,time:1000},function() {
+                                    obj.del();
+                                    layer.close(index);
+                                    layui.table.reload('shop-list');
+                                });
+                            }
+                            else {
+                                layer.msg("删除失败",{icon: 2,time:1000});
+                            }
+                        }
+                    });
+                });
+            }
+
+            else if(obj.event === 'edit'){
+                layer.open({
+                    type: 2
+                    ,fix: false
+                    ,maxmin: true
+                    ,shadeClose: true
+                    ,shade:0.4
+                    ,title: '编辑店铺'
+                    ,area: ['455px', '450px']
+                    ,content:'/admin/getPage?path=shop-edit&access_token='+userInfoUtils.getAccessToken()
+                    ,success:function(layero,index){
+                        var body = layer.getChildFrame('body', index);
+                        body.find("#shopid").val(data.id);
+                        body.find("#shopname").val(data.name);
+                        body.find("#shopinfo").val(data.info);
+                        body.find("#shoplocation").val(data.locationText);
+                        body.find("#longitude").val(data.longitude);
+                        body.find("#latitude").val(data.latitude);
+                        body.find("#shopImage").val(data.shopImage)
+                    }
+                });
+                form.render();
+            }
+            else if(obj.event === 'setManager'){
+                layer.open({
+                    type: 2
+                    ,fix: false
+                    ,maxmin: true
+                    ,shadeClose: true
+                    ,shade:0.4
+                    ,title: '用户列表'
+                    ,area: ['470px', '650px']
+                    ,content:'/admin/getPage?path=shop-setManager&access_token='+userInfoUtils.getAccessToken()
+                    ,success:function(layero,index){
+                        var body = layer.getChildFrame('body', index);
+                        body.find("#shopid").val(data.id);
+                        body.find("#shopOwnerId").val(data.shopManagerId);
+                        body.find("#shopOwnerName").val(data.shopManagerName);
+                    }
+                });
+                form.render();
+            }
+
+        });
+
+        $(document).on('click','#delSome',function(){
+            var checkStatus = table.checkStatus('shop-list');
+            if(checkStatus.data.length == 0){
+                layer.msg('请选择要删除的店铺', {icon: 2});
+                return ;
+            }
+            layer.confirm('确定删除该数据吗？', function(index){
+            var ids = [];
+            for(var i = 0; i < checkStatus.data.length; i++){
+                ids .push( checkStatus.data[i].id );
+            }
+
+            $.ajax({
+                url: '/api/shop/list?access_token='+userInfoUtils.getAccessToken(),
+                type: 'delete',
+                data: {ids: ids},
+                dataType: 'JSON',
+                success: function (data) {
+                    if(data.code == 200) {
+                        layer.msg("删除成功",{icon: 1,time:1000},function() {
+                            layui.table.reload('shop-list');
+                        });
+                    }
+                    else {
+                        layer.msg("删除失败",{icon: 2,time:1000});
+                    }
+                }
+            });
+            });
+        });
+    });
+</script>
+</body>
+</html>

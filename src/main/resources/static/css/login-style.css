@@ -1,0 +1,83 @@
+body{
+    font-family:"微软雅黑","Arial";
+    margin:0;
+    padding:0;
+    height:100%;
+    overflow:hidden;
+    background:url(../img/bg-a-1.jpg) no-repeat center fixed;
+    background-size:cover;
+}
+
+ul,li{
+    list-style:none;
+    margin:0;
+    padding:0;
+}
+
+.login{
+	width:400px;
+	height:360px;
+	left:50%;
+	top:50%;
+	margin:-225px 0 0 -200px;
+	border-radius:5px;
+	background:rgba(1,0,0,0.3);
+	position:fixed;
+}
+
+.login-list{
+	width:90%;
+	margin:0 auto;
+}
+
+.login-list li{
+	margin-bottom:15px;
+	position:relative;
+}
+
+.login-list input{
+	width:100%;
+	font-size:14px;
+    padding:13px 10px;
+    border:1px solid #e6e6e6;
+    border-radius:3px;
+    display:block;
+    box-sizing:border-box;
+}
+
+.login-list input:focus{
+    border:1px solid #228B22;
+}
+
+.login-list .btn{
+	width:100%;
+	height:45px;
+	line-height:45px;
+	font-size:16px;
+	border-radius:3px;
+	color:#fff;
+	background:#009245;
+	display:block;
+	text-align:center;
+}
+
+.login-list .btn:hover{
+	background:#228B22;
+}
+
+@media screen and (max-width: 992px){
+	.login{
+		width:96%;
+		margin: 0;
+		height: auto;
+		background:transparent;
+		-webkit-transform:translate(-50%, -50%);
+	}
+	.login-list{
+		width: 90%;
+	}
+	.login-list input{
+		width: 100%;
+		-webkit-box-sizing:border-box;
+	}
+}
